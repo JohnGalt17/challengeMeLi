@@ -1,0 +1,40 @@
+version: '3.3'
+
+services:
+  appml:
+    build:
+      context: .
+    image: appml
+    container_name: appml
+    ports:
+      - "8080:8080"
+    volumes:
+      - "./app:/home/node/app" 
+      - node_modules:/home/node/app/node_modules
+    command: npm run start
+    # command: nodemon index.js
+    depends_on:
+      - db
+
+  db:
+    image: mysql:5.7
+    container_name: mysqldb
+    # Corre dos comandos al inicializar:
+    # - Ejecuta el script inicial de la base de datos (montado en volumes).
+    # - Define el modo de autenticacion (para que funcione segun esta configurada la app)
+    command: --init-file /data/application/init.sql --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_USER: 'root'
+      MYSQL_PASSWORD: 'mfmf'
+      MYSQL_ROOT_PASSWORD: 'mfmf'
+    ports:
+      - '33060:3306'
+    expose:
+      - '33060'
+    volumes:
+      - ./app/scripts/script_db.sql:/data/application/init.sql
+      - my-db:/var/lib/mysql
+volumes:
+  node_modules:
+  my-db:
